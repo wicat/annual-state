@@ -28,5 +28,4 @@ def classify_2016():
         lls.append(t)
         dst = TOPDIR + "2016/" + t + ".pdf"
 
-classify_2016()
 

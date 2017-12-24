@@ -67,5 +67,3 @@ def classify_1214():
         _move_pdf("2013/"+i, dst)
 
 
-check_dir()
-classify_1214()
