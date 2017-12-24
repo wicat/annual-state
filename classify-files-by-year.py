@@ -56,12 +56,6 @@ def classify_1214():
     lls10 = []
     ost = []
 
-'''
-    files = []
-    with open("2012-2014.txt", "rt") as f:
-        for i in f:
-            files.append(i.replace("\r", "").replace("\n", ""))
-'''
     files = os.listdir("2012-2014")
     for i in files:
         x = i.split(".")
