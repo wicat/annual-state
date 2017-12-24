@@ -40,11 +40,11 @@ def classify_1516():
         dst = TOPDIR + "2015/" + t + ".pdf"
         _move_pdf("2015/"+i, dst)
 
-def _classify_1214(i, t, lls):
+def _classify_1214(i, t, lls, d):
     if t in lls:
         t = _rename_id(t, lls)
     lls.append(t)
-    dst = TOPDIR + "2010/" + t + ".pdf"
+    dst = TOPDIR + d + t + ".pdf"
     _move_pdf("2012-2014/"+i, dst)
     return lls
 
@@ -63,15 +63,15 @@ def classify_1214():
         u = x[0][6:]
 
         if "10" in u:
-            lls10 = _classify_1214(i, t, lls10)
+            lls10 = _classify_1214(i, t, lls10, "2010/")
         elif "11" in u:
-            lls11 = _classify_1214(i, t, lls11)
+            lls11 = _classify_1214(i, t, lls11, "2011/")
         elif "12" in u:
-            lls12 = _classify_1214(i, t, lls12)
+            lls12 = _classify_1214(i, t, lls12, "2012/")
         elif "13" in u:
-            lls13 = _classify_1214(i, t, lls13)
+            lls13 = _classify_1214(i, t, lls13, "2013/")
         elif "14" in u:
-            lls14 = _classify_1214(i, t, lls14)
+            lls14 = _classify_1214(i, t, lls14, "2014/")
         else:
             ost.append(i)
     print("ost=%d"%len(ost))
