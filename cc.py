@@ -11,7 +11,7 @@ def _rename_id(id1, lls, c=1):
 def classify_2016():
     lls = []
     files = []
-    with open("2016.txt", "rt") as f:
+    with open("2015.txt", "rt") as f:
         for i in f:
             files.append(i.replace("\r", "").replace("\n", ""))
     for i in files:
@@ -19,7 +19,7 @@ def classify_2016():
         t = x[0][:6]
 
         u = x[0][6:]
-        if "2016年年度报告" not in u:
+        if "2015年年度报告" not in u:
             print(i)
         continue
 

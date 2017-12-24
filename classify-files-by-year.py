@@ -18,7 +18,7 @@ def check_dir():
 def _rename_id(id1, lls, c=1):
     id2 = "%s-%d" % (id1, c)
     if id2 in lls:
-        _rename_id(id1, lls, c+1)
+        id2 = _rename_id(id1, lls, c+1)
     return id2
 
 def _move_pdf(src, dst):
@@ -27,23 +27,17 @@ def _move_pdf(src, dst):
     else:
         os.rename(src, dst)
 
-def classify_2016():
+def classify_1516():
     lls = []
-    files = os.listdir("2016")
+    files = os.listdir("2015")
     for i in files:
         x = i.split(".")
         t = x[0][:6]
 
-        u = x[0][6:]
-        if "2016年年度报告" not in u:
-            print(i)
-        continue
-
         if t in lls:
             t = _rename_id(t, lls)
         lls.append(t)
-        dst = TOPDIR + "2016/" + t + ".pdf"
-        _move_pdf()
+        dst = TOPDIR + "2015/" + t + ".pdf"
+        _move_pdf("2015/"+i, dst)
 
-classify_2016()
-
+classify_1516()
