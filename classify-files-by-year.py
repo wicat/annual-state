@@ -33,11 +33,17 @@ def classify_2016():
     for i in files:
         x = i.split(".")
         t = x[0][:6]
+
+        u = x[0][6:]
+        if "2016" not in u:
+            print(i)
+        continue
+
         if t in lls:
             t = _rename_id(t, lls)
         lls.append(t)
         dst = TOPDIR + "2016/" + t + ".pdf"
-        print(dst)
+        _move_pdf()
 
 classify_2016()
 
