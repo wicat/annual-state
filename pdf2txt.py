@@ -1,37 +1,16 @@
-#!/bin/python2.7
-# -*- coding: UTF-8 -*-  
-import os
-from pdfminer.pdfparser import PDFParser
+#!/usr/bin/python
+import sys
 from pdfminer.pdfdocument import PDFDocument
-from pdfminer.pdfpage import PDFPage, PDFTextExtractionNotAllowed
+from pdfminer.pdfparser import PDFParser
 from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
 from pdfminer.pdfdevice import PDFDevice, TagExtractor
+from pdfminer.pdfpage import PDFPage
 from pdfminer.converter import XMLConverter, HTMLConverter, TextConverter
 from pdfminer.cmapdb import CMapDB
 from pdfminer.layout import LAParams
 from pdfminer.image import ImageWriter
 
-DIRS = ["2010", "2011", "2012", "2013", "2014", "2015", "2016"]
-TOPDIR = "stdata/"
-RESDIR = "resdir"
-
-def pdf_test():
-    pdf = "test.pdf"
-    fp = open(pdf, 'rb')
-    parser = PDFParser(fp)
-    document = PDFDocument(parser)
-    if not document.is_extractable:
-        raise PDFTextExtractionNotAllowed
-        rsrcmgr = PDFResourceManager()
-        device = PDFDevice(rsrcmgr)
-        interpreter = PDFPageInterpreter(rsrcmgr, device)
-        for page in PDFPage.create_pages(document):
-            interpreter.process_page(page)
-    
-pdf_test()
-
-
-
+# main
 def main(argv):
     import getopt
     def usage():
@@ -134,3 +113,4 @@ def main(argv):
     outfp.close()
     return
 
+if __name__ == '__main__': sys.exit(main(sys.argv))
