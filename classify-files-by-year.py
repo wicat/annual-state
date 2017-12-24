@@ -34,7 +34,7 @@ def classify_2016():
         x = i.split(".")
         t = x[0][:6]
         if t in lls:
-            _rename_id(t, lls)
+            t = _rename_id(t, lls)
         lls.append(t)
         dst = TOPDIR + "2016/" + t + ".pdf"
         print(dst)
