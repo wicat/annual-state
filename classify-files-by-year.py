@@ -21,17 +21,23 @@ def _rename_id(id1, lls, c=1):
         _rename_id(id1, lls, c+1)
     return id2
 
+def _move_pdf(src, dst):
+    if os.path.exists(dst):
+        print("DST<%s> EXISTS!" % dst)
+    else:
+        os.rename(src, dst)
+
 def classify_2016():
     lls = []
-    llt = []
     files = os.listdir("2016")
     for i in files:
         x = i.split(".")
-        t = x[0][6:]
+        t = x[0][:6]
         if t in lls:
-            
-        else:
-            lls.append(t)
+            _rename_id(t, lls)
+        lls.append(t)
+        dst = TOPDIR + "2016/" + t + ".pdf"
+        print(dst)
 
 classify_2016()
 

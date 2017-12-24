@@ -1,7 +1,11 @@
+*.un~
+.*.un~
+*.pyc
+
+
 2012-2014
 2015
 2016
-*.pyc
 resdir
 stdata
 披露情况说明.docx
