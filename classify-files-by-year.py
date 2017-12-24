@@ -35,7 +35,7 @@ def classify_2016():
         t = x[0][:6]
 
         u = x[0][6:]
-        if "2016年年度报告" not in u:
+        if "2016" not in u:
             print(i)
         continue
 
