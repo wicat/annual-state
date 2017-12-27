@@ -3,19 +3,12 @@
 
 import os
 from cStringIO import StringIO
-from pdfminer.pdfparser import PDFParser
-from pdfminer.pdfdocument import PDFDocument
-from pdfminer.pdfpage import PDFPage, PDFTextExtractionNotAllowed
-from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
-from pdfminer.pdfdevice import PDFDevice, TagExtractor
-from pdfminer.converter import XMLConverter, HTMLConverter, TextConverter
-from pdfminer.cmapdb import CMapDB
-from pdfminer.layout import LAParams
-from pdfminer.image import ImageWriter
 
 DIRS = ["2010", "2011", "2012", "2013", "2014", "2015", "2016"]
 TOPDIR = "stdata/"
 RESDIR = "resdir"
+
+RESULT = "result.txt"
 
 def parse_pdf(fname, outfile, pdst):
     cnt = 1
@@ -64,9 +57,32 @@ def do_parse(fdate):
                 f.write(i+"\n")
 
 
-do_parse("2012/")
-do_parse("2013/")
-do_parse("2014/")
-do_parse("2015/")
-do_parse("2016/")
+retlist = [[],[],[],[],[]]
+dirlist = [[],[],[],[],[]]
+pdst = "stdata2/"
+
+dirlist[0] = os.listdir(pdst + "2012")
+dirlist[1] = os.listdir(pdst + "2013")
+dirlist[2] = os.listdir(pdst + "2014")
+dirlist[3] = os.listdir(pdst + "2015")
+dirlist[4] = os.listdir(pdst + "2016")
+
+with open(RESUTL, "rt") as f:
+    x1 = ""
+    x2 = ""
+    x3 = ""
+    cnt = 0
+    for i in f:
+        if cnt == 3:
+            cnt = 0
+            
+
+        if cnt == 0:
+            x1 = i.replace("\n","").replace("\r","")
+        elif cnt == 1:
+            x2 = i.replace("\n","").replace("\r","")
+        else:
+            x3 = i.replace("\n","").replace("\r","")
+        cnt += 1
+
 
