@@ -20,9 +20,11 @@ RESDIR = "resdir"
 def parse_pdf(fname, outfile, pdst):
     cnt = 1
     fid = fname.split("/")[-1].split(".")[0]
-    outlist = list()
     outfp = StringIO()
     fp = file(fname, 'rb')
+    flag = 0
+    cell_page = 0
+    cell_text = ""
     
     rsrcmgr = PDFResourceManager(caching=True)        
     device = TextConverter(rsrcmgr, outfp, codec='utf-8', laparams=LAParams(), imagewriter=None)
@@ -33,17 +35,20 @@ def parse_pdf(fname, outfile, pdst):
         cell = outfp.getvalue().replace("\n","").replace("\r","").rstrip()
         outfp.truncate(0)
         
-        #outlist.append(cell)
-        if r"重大风险提示" in cell:
-            with open(outfile, "at") as f:
-                f.write(fid+"\n")
-                f.write("%d\n" % cnt)
-                f.write(cell+"\n")
-            if os.path.exists(pdst): print("DST <%s> EXISTS!" % pdst)
-            else: os.rename(fname, pdst)
-
+        if r"重大风险提示" in cell: 
+            flag += 1
+            cell_page = cnt
+            cell_text = cell
         if cnt == 10: break
         cnt += 1
+
+    if flag == 1:
+        with open(outfile, "at") as f:
+            f.write(fid+"\n")
+            f.write("%d\n" % cell_page)
+            f.write(cell_text+"\n")
+        if os.path.exists(pdst): print("DST <%s> EXISTS!" % pdst)
+        else: os.rename(fname, pdst)
 
     fp.close()
     device.close()
@@ -51,14 +56,13 @@ def parse_pdf(fname, outfile, pdst):
     return
 
 def do_parse(fdate):
-    psrc = "stdata/" + fdate
-    pdst = "stdata2/" + fdate
+    psrc = "stdata3/" + fdate
+    pdst = "stdata4/" + fdate
     if not os.path.isdir(pdst): os.mkdir(pdst)
-
     files = os.listdir(psrc)
     for i in files:
         try:
-            x = parse_pdf(psrc+i, "result-%s.txt" % fdate[:-1], pdst+i)
+            parse_pdf(psrc+i, "result-%s.txt" % fdate[:-1], pdst+i)
         except:
             with open("error.log", "at") as f:
                 f.write(i+"\n")

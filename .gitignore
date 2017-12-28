@@ -9,10 +9,13 @@
 resdir
 stdata
 stdata2
+stdata3
+stdata4
+
 
 nohup.out
 test.pdf
-result.txt
+result-*.txt
 披露情况说明.docx
 重大风险提示手工收集供参考.xlsx
 风险点内因外因.docx

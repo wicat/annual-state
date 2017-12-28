@@ -72,13 +72,16 @@ with open(RESUTL, "rt") as f:
     x2 = ""
     x3 = ""
     cnt = 0
+    pos = 0
     for i in f:
         if cnt == 3:
             cnt = 0
+            if not dirlist[pos]:
+                pos += 1
             
 
         if cnt == 0:
-            x1 = i.replace("\n","").replace("\r","")
+            x1 = i.replace("\n","").replace("\r","")+".pdf"
         elif cnt == 1:
             x2 = i.replace("\n","").replace("\r","")
         else:
