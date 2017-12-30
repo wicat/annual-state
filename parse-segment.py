@@ -1,4 +1,4 @@
-#!/bin/python2.7
+#!/usr/bin/python2.7
 # -*- coding: UTF-8 -*-  
 
 import os
@@ -25,14 +25,28 @@ def load_data(path):
             cnt += 1
     return data
 
+def write_io(text, idd):
+    with open("res.txt", "at") as f:
+        f.write("%d %s\n" % (idd, text))
 
 def parse_data(path):
+    y = []
     data = load_data(path)
     for cell in data:
         x = cell[2].replace(" ","").find(r"重大风险提示")
-        if x > 100 and x < 150:
-            print cell[0]
-            print cell[2]
+        y.append([x, cell[2]])
+
+#        if x < 100:
+#            print cell[0]
+#            print cell[2]
+    return y
 
 
-parse_data("result-2012.txt")
+abc =[]
+for i in ["2012","2013","2014","2015","2016"]:
+    y = parse_data("result-%s.txt" % i) 
+    abc.extend(y)
+abc.sort()
+for i in abc:
+    write_io(i[1], i[0])
+
