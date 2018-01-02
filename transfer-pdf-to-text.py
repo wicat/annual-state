@@ -23,6 +23,7 @@ def _list2str(l):
     return (s[:-1] if len(s) > 0 else "")
 
 def parse_pdf(fname, outfile):
+    
     pid = ""
     pyear = ""
     ptip = False
