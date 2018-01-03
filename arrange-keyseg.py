@@ -22,10 +22,8 @@ def _list2str(l):
     for i in l: s += i.replace(",", r"，") + "|"
     return (s[:-1] if len(s) > 0 else "")
 
-_list2str([])
-
 def _ptip_text(cell):
-    pass
+    if r"重大风险提示" in cell:
 
 def _padvise(cell):
     pass
@@ -55,13 +53,14 @@ def parse_pdf(fname, outfile):
         cell = outfp.getvalue().replace("\n","").replace("\r","").replace("\t","").strip()
         outfp.truncate(0)
 
+        ###------------------------------------###
         if cnt <= 10 and ptip != False:
             (ptip, ptip_text, pone_page) = _ptip_text(cell)
             cnt += 1
-
         if not padvise:
             padvise = _padvise(cell)
-        
+        ###------------------------------------###
+
     fp.close()
     device.close()
     outfp.close()
@@ -102,5 +101,5 @@ def wtf():
     return
 
 
-#wtf()
+wtf()
 
