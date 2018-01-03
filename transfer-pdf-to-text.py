@@ -23,9 +23,9 @@ def _list2str(l):
     return (s[:-1] if len(s) > 0 else "")
 
 def parse_pdf(fname, outfile):
-    
-    pid = ""
-    pyear = ""
+    _pid = fname.split("/")[-1].split(".")[0].split("+")
+    pid = _pid[0]
+    pyear = _pid[1]
     ptip = False
     ptip_text = ""
     ptip_type = 0
@@ -44,7 +44,6 @@ def parse_pdf(fname, outfile):
     for page in PDFPage.get_pages(fp, set(), maxpages=0, caching=True, check_extractable=True):
         interpreter.process_page(page)
         cell = outfp.getvalue().replace("\n","").replace("\r","").replace("\t","").strip()
-        cells.append(cell)
         outfp.truncate(0)
         
     fp.close()
