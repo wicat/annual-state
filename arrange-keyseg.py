@@ -1,4 +1,4 @@
-#!/bin/python2.7
+#!/usr/bin/python2.7
 # -*- coding: UTF-8 -*-  
 
 import os
@@ -22,6 +22,14 @@ def _list2str(l):
     for i in l: s += i.replace(",", r"，") + "|"
     return (s[:-1] if len(s) > 0 else "")
 
+_list2str([])
+
+def _ptip_text(cell):
+    pass
+
+def _padvise(cell):
+    pass
+
 def parse_pdf(fname, outfile):
     _pid = fname.split("/")[-1].split(".")[0].split("+")
     pid = _pid[0]
@@ -34,6 +42,7 @@ def parse_pdf(fname, outfile):
     ptip_outr = []
     padvise = False
     pone_page = False
+    cnt = 0
 
     outfp = StringIO()
     fp = file(fname, 'rb')
@@ -45,6 +54,13 @@ def parse_pdf(fname, outfile):
         interpreter.process_page(page)
         cell = outfp.getvalue().replace("\n","").replace("\r","").replace("\t","").strip()
         outfp.truncate(0)
+
+        if cnt <= 10 and ptip != False:
+            (ptip, ptip_text, pone_page) = _ptip_text(cell)
+            cnt += 1
+
+        if not padvise:
+            padvise = _padvise(cell)
         
     fp.close()
     device.close()
@@ -86,5 +102,5 @@ def wtf():
     return
 
 
-wtf()
+#wtf()
 
