@@ -22,12 +22,32 @@ def _list2str(l):
     for i in l: s += i.replace(",", r"，") + "|"
     return (s[:-1] if len(s) > 0 else "")
 
+def _get_header(cell1, cell2):
+    header = ""
+    pos = min(len(cell1), len(cell2))
+    for i in range(pos):
+        if cell1[i] != cell2[i]:
+            header = cell1[:i]
+            break
+    return header
+
 def _ptip_text(cell):
-    if r"重大风险提示" in cell:
+    ptip = False
+    ptip_text = ""
+    pone_page = False
+    if u"重大风险提示" in cell:
+        if u"........" in cell or u"······" in cell or u"目录" in cell:
+            pass
+        else:
+            ptip = True
+            ptip_text = cell
+    return (ptip, ptip_text, pone_page)
 
 def _padvise(cell):
-    pass
-
+    if u"出具了" in cell and u"意见" in cell:
+        return True
+    return False
+        
 def parse_pdf(fname, outfile):
     _pid = fname.split("/")[-1].split(".")[0].split("+")
     pid = _pid[0]
@@ -40,7 +60,10 @@ def parse_pdf(fname, outfile):
     ptip_outr = []
     padvise = False
     pone_page = False
+
     cnt = 0
+    last_page = None
+    header = ""
 
     outfp = StringIO()
     fp = file(fname, 'rb')
@@ -50,21 +73,32 @@ def parse_pdf(fname, outfile):
 
     for page in PDFPage.get_pages(fp, set(), maxpages=0, caching=True, check_extractable=True):
         interpreter.process_page(page)
-        cell = outfp.getvalue().replace("\n","").replace("\r","").replace("\t","").strip()
+        cell = outfp.getvalue().replace("\n","").replace("\r","").replace("\t","").replace(" ","")
         outfp.truncate(0)
 
         ###------------------------------------###
         if cnt <= 10 and ptip != False:
             (ptip, ptip_text, pone_page) = _ptip_text(cell)
             cnt += 1
+            if last_page != None and cnt > 2:
+                header = _get_header(last_page, cell)
+            last_page = cell
+                
         if not padvise:
             padvise = _padvise(cell)
+        if padvise and ptip:
+            break
         ###------------------------------------###
 
     fp.close()
     device.close()
     outfp.close()
     
+    if len(ptip_text) > len(header):
+        ptip_text = ptip_text[len(header):]
+        ret = ptip_text.find(u"重大风险提示")
+        if ret != -1 and ret < 5:
+            pone_page = True
     with open(outfile, "at") as f:
         f.write(pid+",")
         f.write(pyear+",")
