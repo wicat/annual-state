@@ -1,7 +1,7 @@
 #!/usr/bin/python2.7
 # -*- coding: UTF-8 -*-  
 
-import os
+import os, traceback, sys, chardet
 from cStringIO import StringIO
 from pdfminer.pdfparser import PDFParser
 from pdfminer.pdfdocument import PDFDocument
@@ -13,6 +13,9 @@ from pdfminer.cmapdb import CMapDB
 from pdfminer.layout import LAParams
 from pdfminer.image import ImageWriter
 
+reload(sys)
+sys.setdefaultencoding("utf8")
+
 def _move_pdf(src, dst):
     if os.path.exists(dst): print("DST<%s> EXISTS!" % dst)
     else: os.rename(src, dst)
@@ -23,13 +26,13 @@ def _list2str(l):
     return (s[:-1] if len(s) > 0 else "")
 
 def _get_header(cell1, cell2):
-    header = ""
+    header = 0
     pos = min(len(cell1), len(cell2))
     for i in range(pos):
         if cell1[i] != cell2[i]:
             header = cell1[:i]
-            break
-    return header
+            return i
+    return 0
 
 def _ptip_text(cell):
     ptip = False
@@ -63,8 +66,9 @@ def parse_pdf(fname, outfile):
 
     cnt = 0
     last_page = None
-    header = ""
+    header = []
 
+    #print "INFO: NEW PDF DOC"
     outfp = StringIO()
     fp = file(fname, 'rb')
     rsrcmgr = PDFResourceManager(caching=True)        
@@ -74,16 +78,19 @@ def parse_pdf(fname, outfile):
     for page in PDFPage.get_pages(fp, set(), maxpages=0, caching=True, check_extractable=True):
         interpreter.process_page(page)
         cell = outfp.getvalue().replace("\n","").replace("\r","").replace("\t","").replace(" ","")
+        #print "INFO: PARSING CELL"
         outfp.truncate(0)
-
+        
         ###------------------------------------###
-        if cnt <= 10 and ptip != False:
+        if cnt <= 10 and ptip == False:
             (ptip, ptip_text, pone_page) = _ptip_text(cell)
+            #print "INFO: ptip=", ptip, "ptip_text=", ptip_text, "pone_page=", pone_page, "header=", header
             cnt += 1
-            if last_page != None and cnt > 2:
-                header = _get_header(last_page, cell)
-            last_page = cell
-                
+        
+        if cnt > 2 and last_page != None:
+            header.append(_get_header(last_page, cell))
+        last_page = cell
+
         if not padvise:
             padvise = _padvise(cell)
         if padvise and ptip:
@@ -94,11 +101,21 @@ def parse_pdf(fname, outfile):
     device.close()
     outfp.close()
     
-    if len(ptip_text) > len(header):
-        ptip_text = ptip_text[len(header):]
-        ret = ptip_text.find(u"重大风险提示")
-        if ret != -1 and ret < 5:
-            pone_page = True
+    header.sort()
+    half = len(header) // 2
+    lenhdr = (header[half] + header[~half]) / 2 + 2
+    ptmp_text = ptip_text
+    while lenhdr > 0 and len(ptip_text) > lenhdr:
+        ptmp_text = ptip_text[lenhdr:]
+        try:
+            ret = ptmp_text.find(u"重大风险提示")
+            if ret != -1 and ret < 5:
+                pone_page = True
+            ptip_text = ptmp_text
+            break
+        except:
+            lenhdr -= 1
+
     with open(outfile, "at") as f:
         f.write(pid+",")
         f.write(pyear+",")
@@ -119,14 +136,16 @@ def parse_pdf(fname, outfile):
         f.write(pone_page+"\n")    
     return
 
-def wtf():
+def wtf(year):
     files = os.listdir("stdata")
     cnt = 0
     for i in files:
+        if i[:4] != year: continue
         try:
-            parse_pdf("stdata/"+i, "result.csv")
+            parse_pdf("stdata/"+i, "result-%s.csv"%year)
             _move_pdf("stdata/"+i, "stdata2/"+i)
         except:
+            #print traceback.print_exc()
             with open("error.log", "at") as f: f.write(i+"\n")
         cnt += 1
         if cnt % 100 == 0:
@@ -135,5 +154,8 @@ def wtf():
     return
 
 
-wtf()
+if len(sys.argv) != 2 and sys.argv not in ['2012','2013','2014','2015','2016']:
+    exit()
+print sys.argv[1]
+wtf(sys.argv[1])
 
