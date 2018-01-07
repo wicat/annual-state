@@ -1,17 +1,13 @@
 *.un~
 .*.un~
 *.pyc
-
+*.csv
 
 2012-2014
 2015
 2016
 resdir
-stdata
-stdata2
-stdata3
-stdata4
-
+stdata*
 
 nohup.out
 test.pdf

@@ -1,6 +1,8 @@
 #!/bin/python2.7
 # -*- coding: UTF-8 -*-  
 
+## 用于测试内容的提取和关键字的匹配
+
 import os
 from cStringIO import StringIO
 from pdfminer.pdfparser import PDFParser
