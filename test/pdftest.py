@@ -27,7 +27,8 @@ def parse_pdf(fname, outfile):
     interpreter = PDFPageInterpreter(rsrcmgr, device)
     for page in PDFPage.get_pages(fp, set(), maxpages=0, caching=True, check_extractable=True):
         interpreter.process_page(page)
-        outlist.append(outfp.getvalue().replace("\n","").replace("\r",""))
+        outlist.append(outfp.getvalue().replace("\n","").replace("\r","").replace("\t","")[:-1])
+        outfp.truncate(0)
 
         if cnt == 10: break
         cnt += 1
@@ -39,5 +40,6 @@ def parse_pdf(fname, outfile):
 
 
 x = parse_pdf("test.pdf", "a.txt")
-for i in x:
-    print i
+with open("a.txt", "at") as f:
+    for i in x:
+        f.write(i+"\n")
