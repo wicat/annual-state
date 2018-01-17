@@ -20,6 +20,10 @@ def _move_pdf(src, dst):
     if os.path.exists(dst): print("DST<%s> EXISTS!" % dst)
     else: os.rename(src, dst)
 
+def _check_index(content):
+    for i in content:
+        print i
+
 def parse_pdf(fname, outfile):
     _pid = fname.split("/")[-1].split(".")[0].split("+")
     pid = _pid[1]
@@ -40,8 +44,9 @@ def parse_pdf(fname, outfile):
 
         ###------------------------------------###
         cnt += 1
+        if cnt > 10: break
         tmpcell = cell.replace(" ","")
-        if cnt > 10 or r"目录" in tmpcell: break
+        if r"目录" in tmpcell and _check_index(tmpcell): break
         cells.append(cell)
         ###------------------------------------###
 
@@ -62,7 +67,7 @@ def main():
     for i in files:
         try:
             parse_pdf("stdata-1516/"+i, "result-1516.csv")
-            _move_pdf("stdata-1516/"+i, "stdata-1516-success/"+i)
+            #_move_pdf("stdata-1516/"+i, "stdata-1516-success/"+i)
         except:
             with open("error.log", "at") as f: f.write(i+"\n")
     print "Completed!"
