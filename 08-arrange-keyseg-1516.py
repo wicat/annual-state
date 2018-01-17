@@ -22,8 +22,17 @@ def _move_pdf(src, dst):
 
 def _check_index(content):
     ucontent = unicode(content, "utf-8")
+    matrix = list()
     for i in ucontent:
-        print i
+        flag = True
+        for j in range(len(matrix)):
+            if i == matrix[j][0]:
+                matrix[j][1] += 1
+                flag = False
+                break
+        if flag:
+            matrix.append([i, 1])
+    print matrix
 
 def parse_pdf(fname, outfile):
     _pid = fname.split("/")[-1].split(".")[0].split("+")
