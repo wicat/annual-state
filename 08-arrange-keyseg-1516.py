@@ -21,7 +21,8 @@ def _move_pdf(src, dst):
     else: os.rename(src, dst)
 
 def _check_index(content):
-    for i in content:
+    ucontent = unicode(content, "utf-8")
+    for i in ucontent:
         print i
 
 def parse_pdf(fname, outfile):
