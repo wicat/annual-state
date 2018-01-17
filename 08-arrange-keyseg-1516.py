@@ -32,7 +32,8 @@ def _check_index(content):
                 break
         if flag:
             matrix.append([i, 1])
-    print matrix
+    for i in matrix:
+        print i[0], "=", i[1]
 
 def parse_pdf(fname, outfile):
     _pid = fname.split("/")[-1].split(".")[0].split("+")
