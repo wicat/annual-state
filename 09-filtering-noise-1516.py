@@ -12,7 +12,7 @@ from gensim import corpora, models, similarities
 
 # return string
 def _merge_after_remove_header_and_footer(l_pages):
-    footerbet = u"1234567890-=+<>"
+    footerbet = u"1234567890-=+<>/"
     l_segs = list()
     s_ret = str()
     nr_pages = len(l_pages)
@@ -73,19 +73,11 @@ def _merge_and_split_by_keyword(l_origin):
             l_later.append([i[0], i[1], segments[1]])
     return l_later
 
-def _remove_duplicate(l_origin):
-    lines = list()
-    lines_list = list()
-    for i in l_origin:
-        tmp = i[2].split(u"。")
-        lines.extend(tmp)
-        lines_list.append(tmp)
-
+def __remove_dup_v1(lines_list):
     dictionaries = list()
     lsis = list()
     indexes = list()
     cnts =[0 for i in range(len(lines_list))]
-
     print "PRE"
     for item in lines_list:
         words = [[word for word in jieba.lcut(line)] for line in item]
@@ -96,7 +88,6 @@ def _remove_duplicate(l_origin):
         dictionaries.append(dictionary)
         lsis.append(lsi)
         indexes.append(index)
-
     print "DO"
     for n in range(len(lines_list)):
         for line in lines_list[n]:
@@ -104,26 +95,125 @@ def _remove_duplicate(l_origin):
             query_lsi = lsis[n][compare_text]
             sims = indexes[n][query_lsi]
             for key, val in enumerate(sims):
-                if val > 0.99:
+                if val > 0.9:
                     cnts[n] += 1
     print cnts
     print "DONE"
 
-    '''
+def __remove_dup_v2(lines):
+    candidate = list()
+    candidate.append(lines[0])
+    print "PRE"
+    words = None
+    dictionary = None
+    corpus = None
+    lsi = None
+    index = None
+    rebuild = True
+    for line in lines:
+        if rebuild:
+            words = [[word for word in jieba.lcut(item)] for item in candidate]
+            dictionary = corpora.Dictionary(words)
+            corpus = [dictionary.doc2bow(word) for word in words]
+            lsi = models.LsiModel(corpus, id2word=dictionary, num_topics=20)
+            index = similarities.MatrixSimilarity(lsi[corpus])
+
+        compare_text = dictionary.doc2bow(jieba.lcut(line))
+        query_lsi = lsi[compare_text]
+        sims = index[query_lsi]
+        flag = True
+        for m,elem in enumerate(sims):
+            if elem > 0.9:
+                flag = False
+                break
+        if flag:
+            candidate.append(line)
+            rebuild = True
+        else:
+            rebuild = False
+    with open("result-1516-tmp1.csv", "at") as f:
+        for i in candidate:
+            f.write(i.encode("utf-8")+"\n")
+    print "DONE"
+
+def __remove_dup_v3(lines):
+    cnts =[0 for i in range(len(lines))]
+    print "PRE"
+    words = [[word for word in jieba.lcut(line)] for line in lines]
+    dictionary = corpora.Dictionary(words)
+    corpus = [dictionary.doc2bow(word) for word in words]
+    lsi = models.LsiModel(corpus, id2word=dictionary, num_topics=20)
+    index = similarities.MatrixSimilarity(lsi[corpus])
+    print "DO"
     for n in range(0, len(lines)):
         compare_text = dictionary.doc2bow(jieba.lcut(lines[n]))
         query_lsi = lsi[compare_text]
         sims = index[query_lsi]
         for m,elem in enumerate(sims):
-            if elem >0.99:
-                #print("{}&{}={}".format(len(lines[n]),len(lines[m]),elem))
-                with open("res.txt", "at") as f:
-                    f.write(lines[n]+"\n")
+            if elem > 0.9:
+                cnts[n] += 1
+    with open("result-1516-tmp2.csv", "at") as f:
+        for i in range(len(cnts)):
+            if cnts[i] > 30:
+                f.write(lines[i].encode("utf-8")+"\n")
+    print "DONE"
+
+def _remove_duplicate(l_origin):
+    lines = list()
+    lines_list = list()
+    for i in l_origin:
+        tmp = i[2].split(u"。")
+        while "" in tmp:
+            tmp.remove("")
+        lines.extend(tmp)
+        lines_list.append(tmp)
+    #__remove_dup_v1(lines_list)
+    #__remove_dup_v2(lines)
+    #__remove_dup_v3(lines)
+
+def _split_segs_by_kw(l_origin):
+    cntsucc = 0
+    cntfail = 0
+    l_later = list()
+    for i in l_origin:
+        tmp = i[2].split(u"。")
+        while "" in tmp:
+            tmp.remove("")
+        flag = True
+        cnt = 0
+        for j in tmp:
+            if u"风险" in j or u"風險" in j:
+                flag = False
                 break
-    '''
+            cnt += 1
+        if flag:
+            cntfail += 1
+            l_later.append([i[0], i[1], "0", ""])
+        else:
+            cntsucc += 1
+            tmp = tmp[cnt:]
+            tmpstr = str()
+            for k in tmp:
+                if u"√适用□不适用" in k:
+                    k = k.replace(u"√适用□不适用", "")
+                if u"□适用√不适用" in k:
+                    k = k.replace(u"□适用√不适用", "")
+                if u"其他" in k and len(k) < 20:
+                    continue
+                if u"不派发现金红利" in k:
+                    continue
+                if u"通过的利润分配" in k:
+                    continue
+                tmpstr += k + u"。"
+            l_later.append([i[0], i[1], "1", tmpstr[:-1].replace(u",", u"，")])
 
+    with open("result-1516-ver2.csv", "at") as f:
+        for i in l_later:
+            f.write("%s, %s, %s, %s\n" % (i[0].encode("utf-8"),i[1].encode("utf-8"),i[2].encode("utf-8"), i[3].encode("utf-8")))
+    print "SUCCESS=%d, FAILED=%d" % (cntsucc, cntfail)
+    print "Completed!"
 
-def main():
+def main_first_half():
     l_origin = list()
     l_later = list()
     with open("result-1516.csv", "rt") as f:
@@ -134,12 +224,27 @@ def main():
     print len(l_later)
     l_later = _merge_and_split_by_keyword(l_later)
     print len(l_later)
-    _remove_duplicate(l_later)
-
-
+    with open("result-1516-ver1.csv", "at") as f:
+        for i in l_later:
+            f.write("%s\t%s\t%s\n" % (i[0].encode("utf-8"),i[1].encode("utf-8"),i[2].encode("utf-8")))
     print "Completed!"
     return
 
-if __name__ == '__main__':
+def main_last_half():
+    l_origin = list()
+    l_later = list()
+    with open("result-1516-ver1.csv", "rt") as f:
+        for i in f:
+            l_origin.append(unicode(i.strip(), "utf-8"))
+    for i in l_origin:
+        l_later.append(i.split("\t"))
+    print len(l_later)
+    _split_segs_by_kw(l_later)
+    #_remove_duplicate(l_later)
+    print "Completed!"
+    return
 
-    main()
+
+if __name__ == '__main__':
+    #main_first_half()
+    main_last_half()
